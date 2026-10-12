@@ -8,7 +8,11 @@ let page = html(.lang("en")) {
     body {
         h1("Gabriel Garcia")
         for i in 0..<10 {
-            p("\(i)")
+            e("p") {
+                "\(i)"
+                " "
+                a("home", href: "https://garciat.com")
+            }
         }
     }
 }

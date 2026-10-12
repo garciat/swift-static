@@ -101,30 +101,43 @@ func formatTextOnly(_ elem: Elem, _ text: String) -> String {
     "\(formatOpen(elem))\(text)\(formatClose(elem))"
 }
 
+func containsText(_ nodes: [Node]) -> Bool {
+    for node in nodes {
+        if case .text = node {
+            return true
+        }
+    }
+    return false
+}
+
 func formatHtml(_ node: Node) -> String {
-    func go(_ node: Node, _ level: Int) -> [String] {
-        let s =
-            switch node {
-            case .elem(let elem):
-                switch zom(elem.children) {
-                case .zero:
-                    [formatEmpty(elem)]
-                case .one(.text(let text)):
-                    [formatTextOnly(elem, text)]
-                case .one(let child):
-                    [formatOpen(elem)] + go(child, level + 1) + [formatClose(elem)]
-                default:
-                    [formatOpen(elem)] + elem.children.flatMap { go($0, level + 1) } + [
-                        formatClose(elem)
+    func go(_ node: Node) -> [String] {
+        switch node {
+        case .elem(let elem):
+            switch zom(elem.children) {
+            case .zero:
+                [formatEmpty(elem)]
+            case .one(.text(let text)):
+                [formatTextOnly(elem, text)]
+            default:
+                if containsText(elem.children) {
+                    [
+                        formatOpen(elem),
+                        "  " + elem.children.flatMap { go($0) }.joined(),
+                        formatClose(elem),
                     ]
+                } else {
+                    [formatOpen(elem)]
+                        + elem.children.flatMap { go($0) }.map { "  " + $0 }
+                        + [formatClose(elem)]
                 }
-            case .text(let it):
-                [it]
             }
-        return s.map { (level == 0 ? "" : "  ") + $0 }
+        case .text(let it):
+            [it]
+        }
     }
 
-    return go(node, 0).joined(separator: "\n")
+    return go(node).joined(separator: "\n")
 }
 
 func formatPage(_ root: Node) -> String {
@@ -133,6 +146,10 @@ func formatPage(_ root: Node) -> String {
 
 @resultBuilder
 struct HtmlBuilder {
+    static func buildExpression(_ expression: String) -> [Node] {
+        [.text(expression)]
+    }
+
     static func buildExpression(_ expression: Node) -> [Node] {
         [expression]
     }
@@ -202,6 +219,14 @@ func h1(_ text: String) -> Node {
 
 func p(_ text: String) -> Node {
     e("p", text)
+}
+
+func p(_ parts: Node...) -> Node {
+    e("p", attrs: [:]) { parts }
+}
+
+func a(_ text: String, href: String) -> Node {
+    e("a", text, attrs: [.generic("href"): href])
 }
 
 enum ViewportWidth {
