@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-static}",
+            "name": "Debug swift-static",
+            "target": "swift-static",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug swift-static"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-static}",
+            "name": "Release swift-static",
+            "target": "swift-static",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release swift-static"
+        }
+    ]
+}
