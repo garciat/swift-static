@@ -245,6 +245,18 @@ func p(_ text: String) -> Node {
     e("p") { text }
 }
 
+func ul<S: Sequence>(_ items: S, @HtmlBuilder content: (S.Element) -> Node) -> Node {
+    e("ul") {
+        for item in items {
+            content(item)
+        }
+    }
+}
+
+func li(@HtmlBuilder content: () -> Node) -> Node {
+    e("li", content)
+}
+
 func a(href: String, @HtmlBuilder content: () -> Node) -> Node {
     e("a", attrs: [.href: href], content)
 }
