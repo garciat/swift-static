@@ -47,11 +47,7 @@ enum TreeRoot {
     }
 
     func render(to basePath: URL) throws {
-        let startT = CFAbsoluteTimeGetCurrent()
-
         for (path, res) in flatten(basePath) {
-            let startT = CFAbsoluteTimeGetCurrent()
-
             try FileManager.default.createDirectory(
                 at: path.deletingLastPathComponent(),
                 withIntermediateDirectories: true,
@@ -66,14 +62,10 @@ enum TreeRoot {
                 try s.write(to: path, atomically: true, encoding: .utf8)
             }
 
-            let elapsed = CFAbsoluteTimeGetCurrent() - startT
-
-            print("[render]", "wrote \(path.relativePath)", _formatMs(elapsed))
+            print("[render]", "wrote \(path.relativePath)")
         }
 
-        let elapsed = CFAbsoluteTimeGetCurrent() - startT
-
-        print("[render]", "done", _formatMs(elapsed))
+        print("[render]", "done")
     }
 
     func flatten(_ basePath: URL) -> [(URL, Response)] {
@@ -104,8 +96,4 @@ enum Tree {
                 + children.flatMap { $0.flatten(next) }
         }
     }
-}
-
-private func _formatMs(_ value: Double) -> String {
-    "\(String(format:"%.0f", value * 1000)) ms"
 }
