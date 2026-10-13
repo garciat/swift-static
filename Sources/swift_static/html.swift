@@ -69,17 +69,17 @@ enum Node {
     case text(String)
     case fragment([Node])
 
+    func flattened() -> [Node] {
+        switch self {
+        case .fragment(let inner):
+            inner
+        default:
+            [self]
+        }
+    }
+
     static func fragment(flattening nodes: [Node]) -> Node {
-        .fragment(
-            nodes.flatMap {
-                switch $0 {
-                case .fragment(let inner):
-                    inner
-                default:
-                    [$0]
-                }
-            }
-        )
+        .fragment(nodes.flatMap { $0.flattened() })
     }
 }
 
@@ -233,8 +233,13 @@ struct HtmlBuilder {
 }
 
 // Parent Element
+func e(_ name: String, attrs: AttrMap = .empty, children: [Node]) -> Node {
+    .elem(Elem(name: name, attrs: attrs, children: children, isVoid: false))
+}
+
+// Parent Element
 func e(_ name: String, attrs: AttrMap = .empty, @HtmlBuilder _ content: () -> Node) -> Node {
-    .elem(Elem(name: name, attrs: attrs, children: [content()], isVoid: false))
+    e(name, attrs: attrs, children: content().flattened())
 }
 
 // Parent Element
