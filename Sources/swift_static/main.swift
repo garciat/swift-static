@@ -1,12 +1,33 @@
 import Foundation
+import Markdown
 
 // ---
+
+struct PostMeta: Codable {
+    let title: String
+}
+
+let postRaw =
+    """
+    ---
+    title: Welcome
+    ---
+    # Title
+
+    [Hello World](https://garciat.com)
+
+    ## What
+
+    **Yes!!**
+    """
+
+let post = try parseFrontmatter(postRaw)?.mapYaml(to: PostMeta.self)
 
 let site: TreeRoot = .root(
     index: .html(IndexPage()),
     .dir(
         "posts",
-        index: .string("hi")
+        index: .html(PostPage(title: post!.frontmatter.title, content: markdown(post!.body)))
     ),
 )
 
@@ -15,6 +36,12 @@ try site.render(to: URL(fileURLWithPath: "_site", isDirectory: true))
 try await site.serve()
 
 // ---
+
+func PostPage(title: String, content: [Node]) -> Node {
+    BaseLayout(title: title) {
+        content
+    }
+}
 
 func IndexPage() -> Node {
     BaseLayout(title: "Gabriel Garcia") {

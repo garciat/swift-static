@@ -37,6 +37,7 @@ enum Node {
 enum AttrTag: Comparable, Hashable {
     case name
     case content
+    case href
     case generic(String)
 
     var value: String {
@@ -60,6 +61,8 @@ enum Attr {
         }
     }
 }
+
+typealias AttrMap = [AttrTag: String]
 
 func dictAttrs(_ attrs: [Attr]) -> [AttrTag: String] {
     var d: [AttrTag: String] = [:]
@@ -176,6 +179,11 @@ func e(_ name: String, attrs: [AttrTag: String] = [:], @HtmlBuilder _ content: (
 // Parent Element
 func e(_ name: String, _ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
     e(name, attrs: dictAttrs(attrs), content)
+}
+
+// Parent Element
+func e(_ name: String, @HtmlBuilder content: () -> [Node]) -> Node {
+    e(name, attrs: [:], content)
 }
 
 // Textual Element
