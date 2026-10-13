@@ -111,6 +111,13 @@ enum Tree {
 }
 
 extension URL {
+    var fileName: String {
+        let last = lastPathComponent
+        return last.lastIndex(of: ".")
+            .map { String(last.prefix(upTo: $0)) }
+            ?? last
+    }
+
     var fileExtension: String.SubSequence? {
         let last = lastPathComponent
         return last.lastIndex(of: ".").map { last.suffix(from: $0) }

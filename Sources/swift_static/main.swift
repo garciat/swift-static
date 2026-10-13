@@ -7,30 +7,21 @@ struct PostMeta: Codable {
     let title: String
 }
 
-let postRaw =
-    """
-    ---
-    title: Welcome
-    ---
-    # Title
-
-    [Hello World](https://garciat.com)
-
-    ## What
-
-    **Yes!!**
-    """
-
-let post = try parseFrontmatter(postRaw)?.mapYaml(to: PostMeta.self)
+let posts = try loadArticles(PostMeta.self, from: URL(filePath: "example/posts"))
 
 let site: TreeRoot = .root(
-    index: .html(IndexPage()),
+    index: .html(IndexPage(posts)),
     .dir(
         "posts",
-        index: .html {
-            PostPage(title: post!.frontmatter.title) {
-                markdown(post!.body)
-            }
+        posts.map { post in
+            .dir(
+                post.path.fileName,
+                index: .html {
+                    PostPage(title: post.meta.title) {
+                        markdown(post.body)
+                    }
+                },
+            )
         }
     ),
 )
@@ -50,11 +41,18 @@ func PostPage(title: String, @HtmlBuilder content: () -> Node) -> Node {
     }
 }
 
-func IndexPage() -> Node {
+func IndexPage(_ posts: [Article<PostMeta>]) -> Node {
     BaseLayout(title: "Gabriel Garcia") {
         h1("Gabriel Garcia")
-        for i in 0..<10 {
-            p("\(i)")
+
+        e("ul") {
+            for post in posts {
+                e("li") {
+                    a(href: "/posts/\(post.path.fileName)") {
+                        post.meta.title
+                    }
+                }
+            }
         }
     }
 }
