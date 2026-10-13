@@ -31,6 +31,20 @@ struct Elem {
 enum Node {
     case elem(Elem)
     case text(String)
+    case fragment([Node])
+
+    static func fragment(flattening nodes: [Node]) -> Node {
+        .fragment(
+            nodes.flatMap {
+                switch $0 {
+                case .fragment(let inner):
+                    inner
+                default:
+                    [$0]
+                }
+            }
+        )
+    }
 }
 
 // relative ordering for attributes
@@ -143,6 +157,8 @@ func formatHtml(_ node: Node) -> String {
             }
         case .text(let it):
             [it]
+        case .fragment(let nodes):
+            nodes.flatMap { go($0) }
         }
     }
 
@@ -155,39 +171,39 @@ func formatPage(_ root: Node) -> String {
 
 @resultBuilder
 struct HtmlBuilder {
-    static func buildExpression(_ expression: String) -> [Node] {
-        [.text(expression)]
+    static func buildExpression(_ expression: String) -> Node {
+        .text(expression)
     }
 
-    static func buildExpression(_ expression: Node) -> [Node] {
-        [expression]
-    }
-
-    static func buildExpression(_ expression: [Node]) -> [Node] {
+    static func buildExpression(_ expression: Node) -> Node {
         expression
     }
 
-    static func buildBlock(_ components: [Node]...) -> [Node] {
-        components.flatMap { $0 }
+    static func buildExpression(_ expression: [Node]) -> Node {
+        .fragment(flattening: expression)
     }
 
-    static func buildArray(_ components: [[Node]]) -> [Node] {
-        components.flatMap { $0 }
+    static func buildBlock(_ components: Node...) -> Node {
+        .fragment(flattening: components)
+    }
+
+    static func buildArray(_ components: [Node]) -> Node {
+        .fragment(flattening: components)
     }
 }
 
 // Parent Element
-func e(_ name: String, attrs: AttrMap = .empty, @HtmlBuilder _ content: () -> [Node]) -> Node {
-    .elem(Elem(name: name, attrs: attrs, children: content(), isVoid: false))
+func e(_ name: String, attrs: AttrMap = .empty, @HtmlBuilder _ content: () -> Node) -> Node {
+    .elem(Elem(name: name, attrs: attrs, children: [content()], isVoid: false))
 }
 
 // Parent Element
-func e(_ name: String, _ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
+func e(_ name: String, _ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e(name, attrs: AttrMap(of: attrs), content)
 }
 
 // Parent Element
-func e(_ name: String, @HtmlBuilder content: () -> [Node]) -> Node {
+func e(_ name: String, @HtmlBuilder content: () -> Node) -> Node {
     e(name, attrs: .empty, content)
 }
 
@@ -206,19 +222,19 @@ func e(_ name: String, attrs: AttrMap) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: [], isVoid: true))
 }
 
-func html(_ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
+func html(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e("html", attrs: AttrMap(of: attrs), content)
 }
 
-func head(@HtmlBuilder content: () -> [Node]) -> Node {
+func head(@HtmlBuilder content: () -> Node) -> Node {
     e("head", content)
 }
 
-func body(@HtmlBuilder content: () -> [Node]) -> Node {
+func body(@HtmlBuilder content: () -> Node) -> Node {
     e("body", content)
 }
 
-func div(_ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
+func div(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e("div", attrs: AttrMap(of: attrs), content)
 }
 

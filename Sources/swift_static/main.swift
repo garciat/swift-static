@@ -27,7 +27,11 @@ let site: TreeRoot = .root(
     index: .html(IndexPage()),
     .dir(
         "posts",
-        index: .html(PostPage(title: post!.frontmatter.title, content: markdown(post!.body)))
+        index: .html {
+            PostPage(title: post!.frontmatter.title) {
+                markdown(post!.body)
+            }
+        }
     ),
 )
 
@@ -37,9 +41,9 @@ try await site.serve()
 
 // ---
 
-func PostPage(title: String, content: [Node]) -> Node {
+func PostPage(title: String, @HtmlBuilder content: () -> Node) -> Node {
     BaseLayout(title: title) {
-        content
+        content()
     }
 }
 
@@ -52,7 +56,7 @@ func IndexPage() -> Node {
     }
 }
 
-func BaseLayout(title theTitle: String, @HtmlBuilder content: () -> [Node]) -> Node {
+func BaseLayout(title theTitle: String, @HtmlBuilder content: () -> Node) -> Node {
     html(.lang("en")) {
         head {
             meta(charset: "utf-8")

@@ -5,6 +5,10 @@ enum Response {
     case data(Data)
     case html(Node)
     case string(String)
+
+    static func html(@HtmlBuilder content: () -> Node) -> Response {
+        .html(content())
+    }
 }
 
 enum TreeRoot {
