@@ -1,4 +1,4 @@
-name: Build
+name: CI
 
 on:
   push:
@@ -10,7 +10,10 @@ jobs:
     name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os:
+          - ubuntu-latest
+          # DISABLED: expensive $$$
+          # - macos-latest
         swift: ["6.4"]
     runs-on: ${{ matrix.os }}
     steps:
@@ -18,12 +21,11 @@ jobs:
         with:
           swift-version: ${{ matrix.swift }}
           skip-verify-signature: true
-      - name: Get swift version
-        run: swift --version
+
       - uses: actions/checkout@v6
+
       - name: Build
         run: swift build
+
       - name: Run
         run: swift run swift-static
-      # - name: Run tests
-      #   run: swift test

@@ -137,3 +137,26 @@ extension URL {
         }
     }
 }
+
+// helpers
+struct H {
+    static var baseURL: URL {
+        let config =
+            ProcessInfo.processInfo.environment["BASE_URL"]
+            .map { $0.hasSuffix("/") ? $0 : $0 + "/" }
+
+        guard let base = config.flatMap({ URL(string: $0) }) else {
+            return URL(string: "https://localhost:3000/")!
+        }
+
+        return base
+    }
+
+    static func url(_ path: String, absolute: Bool = false) -> String {
+        assert(path.starts(with: "/"))
+
+        let url = URL(string: String(path.dropFirst()), relativeTo: Self.baseURL)!
+
+        return absolute ? url.absoluteString : url.path
+    }
+}

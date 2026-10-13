@@ -54,7 +54,7 @@ func IndexPage(_ posts: [Article<PostMeta>]) -> Node {
 
         ul(posts) { post in
             li {
-                a(href: post.absolutePath) {
+                a(href: H.url(post.absolutePath)) {
                     post.meta.title
                 }
             }
