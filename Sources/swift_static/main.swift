@@ -60,7 +60,7 @@ func BaseLayout(title theTitle: String, @HtmlBuilder content: () -> Node) -> Nod
     html(.lang("en")) {
         head {
             meta(charset: "utf-8")
-            meta(.viewport(.width(.deviceWidth), .initialScale(1)))
+            meta(name: "viewport", content: "width=device-width,initial-scale=1.0")
 
             title(theTitle)
         }

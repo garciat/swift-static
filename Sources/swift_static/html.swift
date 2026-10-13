@@ -255,16 +255,24 @@ func head(@HtmlBuilder content: () -> Node) -> Node {
     e("head", content)
 }
 
+func title(_ text: String) -> Node {
+    e("title") { text }
+}
+
+func meta(charset: String) -> Node {
+    e("meta", attrs: [.generic("charset"): charset])
+}
+
+func meta(name: String, content: String) -> Node {
+    return e("meta", attrs: [.name: name, .content: content])
+}
+
 func body(@HtmlBuilder content: () -> Node) -> Node {
     e("body", content)
 }
 
 func div(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e("div", attrs: AttrMap(of: attrs), content)
-}
-
-func title(_ text: String) -> Node {
-    e("title") { text }
 }
 
 func h1(_ text: String) -> Node {
@@ -277,59 +285,4 @@ func p(_ text: String) -> Node {
 
 func a(href: String, @HtmlBuilder content: () -> Node) -> Node {
     e("a", attrs: [.href: href], content)
-}
-
-enum ViewportWidth {
-    case value(Int)
-    case deviceWidth
-
-    var str: String {
-        switch self {
-        case .value(let val):
-            "\(val)"
-        case .deviceWidth:
-            "device-width"
-        }
-    }
-}
-
-enum MetaViewportItem {
-    case width(ViewportWidth)
-    case initialScale(Double)
-
-    var str: String {
-        switch self {
-        case .width(let val):
-            "width=\(val.str)"
-        case .initialScale(let val):
-            "initial-scale=\(val)"
-        }
-    }
-}
-
-enum MetaNameContent {
-    case description(String)
-    case viewport([MetaViewportItem])
-
-    var value: (String, String) {
-        switch self {
-        case .description(let val):
-            ("description", val)
-        case .viewport(let items):
-            ("viewport", items.map { $0.str }.joined(separator: ","))
-        }
-    }
-
-    public static func viewport(_ items: MetaViewportItem...) -> MetaNameContent {
-        .viewport(items)
-    }
-}
-
-func meta(charset: String) -> Node {
-    e("meta", attrs: [.generic("charset"): charset])
-}
-
-func meta(_ value: MetaNameContent) -> Node {
-    let (name, content) = value.value
-    return e("meta", attrs: [.name: name, .content: content])
 }
