@@ -44,7 +44,7 @@ private struct DocumentToNodes: MarkupVisitor {
     mutating func visitOrderedList(_ orderedList: OrderedList) -> Node {
         var attrs = AttrMap()
         attrs[.generic("start")] = orderedList.startIndex.formatted()
-        return e("ol", children: visitChildren(orderedList))
+        return e("ol", attrs: attrs, children: visitChildren(orderedList))
     }
 
     mutating func visitListItem(_ listItem: ListItem) -> Node {
@@ -89,7 +89,8 @@ private struct DocumentToNodes: MarkupVisitor {
     func visitImage(_ image: Image) -> Node {
         var attrs = AttrMap()
         attrs[.src] = image.source
-        attrs[.alt] = image.title
+        attrs[.alt] = image.plainText
+        attrs[.title] = image.title
         return e("img", attrs: attrs)
     }
 

@@ -74,6 +74,7 @@ enum AttrTag: Comparable, Hashable {
     case href
     case src
     case alt
+    case title
     case `class`
     case generic(String)
 
