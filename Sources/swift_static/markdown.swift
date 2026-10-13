@@ -10,7 +10,7 @@ private struct DocumentToNodes: MarkupVisitor {
     typealias Result = [Node]
 
     mutating func visitDocument(_ document: Document) -> [Node] {
-        visitChilden(document)
+        visitChildren(document)
     }
 
     mutating func visitHeading(_ heading: Heading) -> [Node] {
@@ -18,7 +18,7 @@ private struct DocumentToNodes: MarkupVisitor {
     }
 
     mutating func visitParagraph(_ paragraph: Paragraph) -> [Node] {
-        [e("p") { visitChilden(paragraph) }]
+        [e("p") { visitChildren(paragraph) }]
     }
 
     mutating func visitLink(_ link: Link) -> [Node] {
@@ -26,11 +26,11 @@ private struct DocumentToNodes: MarkupVisitor {
         if let dest = link.destination {
             attrs[.href] = dest
         }
-        return [e("a", attrs: attrs) { visitChilden(link) }]
+        return [e("a", attrs: attrs) { visitChildren(link) }]
     }
 
     mutating func visitStrong(_ strong: Strong) -> [Node] {
-        [e("strong") { visitChilden(strong) }]
+        [e("strong") { visitChildren(strong) }]
     }
 
     mutating func visitText(_ text: Text) -> [Node] {
@@ -41,7 +41,7 @@ private struct DocumentToNodes: MarkupVisitor {
         fatalError("unhandled markdown markup: \(type(of: markup))")
     }
 
-    private mutating func visitChilden(_ markup: any Markdown.Markup) -> [Node] {
+    private mutating func visitChildren(_ markup: any Markdown.Markup) -> [Node] {
         markup.children.flatMap { $0.accept(&self) }
     }
 }
