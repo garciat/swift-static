@@ -8,6 +8,20 @@ struct PostMeta: Codable {
     let date: Date
 }
 
+extension Article<PostMeta> {
+    static var dirName: String {
+        "posts"
+    }
+
+    var slug: String {
+        path.fileName.encodedURIComponent
+    }
+
+    var absolutePath: String {
+        "/\(Self.dirName)/\(slug)/"
+    }
+}
+
 let posts =
     try loadArticles(PostMeta.self, from: URL(filePath: "example/posts"))
     .sorted { $0.meta.date > $1.meta.date }
@@ -15,22 +29,14 @@ let posts =
 let site: TreeRoot = .root(
     index: .html(IndexPage(posts)),
     .dir(
-        "posts",
+        Article<PostMeta>.dirName,
         posts.map { post in
-            .dir(
-                post.path.fileName,
-                index: .html(PostPage(post)),
-            )
+            .dir(post.slug, index: .html(PostPage(post)))
         }
     ),
 )
 
-switch CommandLine.arguments.dropFirst().first {
-case "serve":
-    try await site.serve()
-default:
-    try site.render(to: URL(fileURLWithPath: "_site", isDirectory: true))
-}
+try await site.main()
 
 // ---
 
@@ -48,7 +54,7 @@ func IndexPage(_ posts: [Article<PostMeta>]) -> Node {
 
         ul(posts) { post in
             li {
-                a(href: "/posts/\(post.path.fileName)/") {
+                a(href: post.absolutePath) {
                     post.meta.title
                 }
             }

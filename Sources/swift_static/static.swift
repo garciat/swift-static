@@ -18,6 +18,15 @@ enum TreeRoot {
         .root(index: index, items)
     }
 
+    func main() async throws {
+        switch CommandLine.arguments.dropFirst().first {
+        case "serve":
+            try await serve()
+        default:
+            try render(to: URL(fileURLWithPath: "_site", isDirectory: true))
+        }
+    }
+
     func serve(port: UInt16 = 3000) async throws {
         let server = HTTPServer(port: port)
 
