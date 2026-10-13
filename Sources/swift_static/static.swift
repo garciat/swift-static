@@ -32,6 +32,10 @@ enum TreeRoot {
                     s.data(using: .utf8)!
                 }
 
+            let mimeType =
+                path.fileExtension?.fileExtensionMimeType
+                ?? .defaultHttpMimeType
+
             var paths = [path.absoluteString]
 
             if path.lastPathComponent == "index.html" {
@@ -40,7 +44,11 @@ enum TreeRoot {
 
             for path in paths {
                 await server.appendRoute(path, for: ["GET"]) { request in
-                    HTTPResponse(statusCode: .ok, body: data)
+                    HTTPResponse(
+                        statusCode: .ok,
+                        headers: [.contentType: mimeType],
+                        body: data,
+                    )
                 }
             }
         }
@@ -99,5 +107,25 @@ enum Tree {
             return (index.map { [(next.appendingPathComponent("index.html"), $0)] } ?? [])
                 + children.flatMap { $0.flatten(next) }
         }
+    }
+}
+
+extension URL {
+    var fileExtension: String.SubSequence? {
+        let last = lastPathComponent
+        return last.lastIndex(of: ".").map { last.suffix(from: $0) }
+    }
+}
+
+extension StringProtocol {
+    var fileExtensionMimeType: String {
+        switch self {
+        case ".html": "text/html"
+        default: .defaultHttpMimeType
+        }
+    }
+
+    static var defaultHttpMimeType: String {
+        "application/octet-stream"
     }
 }
