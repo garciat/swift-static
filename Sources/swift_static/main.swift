@@ -48,7 +48,7 @@ func IndexPage(_ posts: [Article<PostMeta>]) -> Node {
         e("ul") {
             for post in posts {
                 e("li") {
-                    a(href: "/posts/\(post.path.fileName)") {
+                    a(href: "/posts/\(post.path.fileName)/") {
                         post.meta.title
                     }
                 }
