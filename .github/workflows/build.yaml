@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        swift: ["6.4"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: swift-actions/setup-swift@v3
+        with:
+          swift-version: ${{ matrix.swift }}
+          skip-verify-signature: true
+      - name: Get swift version
+        run: swift --version
+      - uses: actions/checkout@v6
+      - name: Build
+        run: swift build
+      # - name: Run tests
+      #   run: swift test
