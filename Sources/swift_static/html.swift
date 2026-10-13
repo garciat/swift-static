@@ -161,8 +161,13 @@ func formatTextOnly(_ elem: Elem, _ text: String) -> String {
 
 func containsText(_ nodes: [Node]) -> Bool {
     for node in nodes {
-        if case .text = node {
+        switch node {
+        case .text:
             return true
+        case .fragment(let inner):
+            return containsText(inner)
+        default:
+            continue
         }
     }
     return false
