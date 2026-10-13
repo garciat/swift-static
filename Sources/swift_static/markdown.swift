@@ -21,19 +21,91 @@ private struct DocumentToNodes: MarkupVisitor {
         e("p", children: visitChildren(paragraph))
     }
 
+    mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Node {
+        e("blockquote", children: visitChildren(blockQuote))
+    }
+
+    func visitLineBreak(_ lineBreak: LineBreak) -> Node {
+        e("br")
+    }
+
+    func visitThematicBreak(_ thematicBreak: ThematicBreak) -> Node {
+        e("hr")
+    }
+
+    func visitSoftBreak(_ softBreak: SoftBreak) -> Node {
+        .text(" ")
+    }
+
+    mutating func visitUnorderedList(_ unorderedList: UnorderedList) -> Node {
+        e("ul", children: visitChildren(unorderedList))
+    }
+
+    mutating func visitOrderedList(_ orderedList: OrderedList) -> Node {
+        var attrs = AttrMap()
+        attrs[.generic("start")] = orderedList.startIndex.formatted()
+        return e("ol", children: visitChildren(orderedList))
+    }
+
+    mutating func visitListItem(_ listItem: ListItem) -> Node {
+        e("li") {
+            if let cb = listItem.checkbox {
+                makeCheckbox(cb)
+            }
+            visitChildren(listItem)
+        }
+    }
+
+    private func makeCheckbox(_ checkbox: Checkbox) -> Node {
+        var attrs: AttrMap = [
+            .generic("type"): "checkbox",
+            .generic("disabled"): "",
+        ]
+        if checkbox == .checked {
+            attrs[.generic("checked")] = ""
+        }
+        return e("input", attrs: attrs)
+    }
+
+    mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Node {
+        var codeAttrs = AttrMap()
+        codeAttrs[.class] = codeBlock.language.map { "language-" + $0 }
+
+        return e("pre") {
+            e("code", attrs: codeAttrs) { codeBlock.code }
+        }
+    }
+
+    mutating func visitInlineCode(_ inlineCode: InlineCode) -> Node {
+        e("code") { inlineCode.code }
+    }
+
     mutating func visitLink(_ link: Link) -> Node {
         var attrs = AttrMap()
-        if let dest = link.destination {
-            attrs[.href] = dest
-        }
+        attrs[.href] = link.destination
         return e("a", attrs: attrs, children: visitChildren(link))
+    }
+
+    func visitImage(_ image: Image) -> Node {
+        var attrs = AttrMap()
+        attrs[.src] = image.source
+        attrs[.alt] = image.title
+        return e("img", attrs: attrs)
     }
 
     mutating func visitStrong(_ strong: Strong) -> Node {
         e("strong", children: visitChildren(strong))
     }
 
-    mutating func visitText(_ text: Text) -> Node {
+    mutating func visitEmphasis(_ emphasis: Emphasis) -> Node {
+        e("em", children: visitChildren(emphasis))
+    }
+
+    mutating func visitStrikethrough(_ strikethrough: Strikethrough) -> Node {
+        e("del", children: visitChildren(strikethrough))
+    }
+
+    func visitText(_ text: Text) -> Node {
         .text(text.string)
     }
 

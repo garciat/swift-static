@@ -72,6 +72,9 @@ enum AttrTag: Comparable, Hashable {
     case name
     case content
     case href
+    case src
+    case alt
+    case `class`
     case generic(String)
 
     var value: String {
@@ -175,6 +178,10 @@ struct HtmlBuilder {
     static func buildArray(_ components: [Node]) -> Node {
         .fragment(flattening: components)
     }
+
+    static func buildOptional(_ component: Node?) -> Node {
+        component ?? .fragment([])
+    }
 }
 
 // Parent Element
@@ -198,7 +205,7 @@ func e(_ name: String, @HtmlBuilder content: () -> Node) -> Node {
 }
 
 // Void Element
-func e(_ name: String, attrs: AttrMap) -> Node {
+func e(_ name: String, attrs: AttrMap = .empty) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: [], isVoid: true))
 }
 
