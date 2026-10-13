@@ -5,9 +5,12 @@ import Markdown
 
 struct PostMeta: Codable {
     let title: String
+    let date: Date
 }
 
-let posts = try loadArticles(PostMeta.self, from: URL(filePath: "example/posts"))
+let posts =
+    try loadArticles(PostMeta.self, from: URL(filePath: "example/posts"))
+    .sorted { $0.meta.date > $1.meta.date }
 
 let site: TreeRoot = .root(
     index: .html(IndexPage(posts)),
@@ -16,11 +19,7 @@ let site: TreeRoot = .root(
         posts.map { post in
             .dir(
                 post.path.fileName,
-                index: .html {
-                    PostPage(title: post.meta.title) {
-                        markdown(post.body)
-                    }
-                },
+                index: .html(PostPage(post)),
             )
         }
     ),
@@ -35,9 +34,11 @@ default:
 
 // ---
 
-func PostPage(title: String, @HtmlBuilder content: () -> Node) -> Node {
-    BaseLayout(title: title) {
-        content()
+func PostPage(_ post: Article<PostMeta>) -> Node {
+    BaseLayout(title: post.meta.title) {
+        h1(post.meta.title)
+        p("Posted on \(post.meta.date.formatted(date: .long, time: .omitted))")
+        markdown(post.body)
     }
 }
 

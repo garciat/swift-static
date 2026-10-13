@@ -1,8 +1,9 @@
 ---
 title: Welcome
+date: 2026-10-13
 ---
 
-# Title
+## Title
 
 [Hello World](https://garciat.com)
 
