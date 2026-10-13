@@ -1,12 +1,12 @@
 // ---
 
-enum ZeroOneMany<T> {
+enum ZeroOneMany<S: Sequence> {
     case zero
-    case one(T)
-    case many([T])
+    case one(S.Element)
+    case many(S)
 }
 
-func zom<T>(_ arr: [T]) -> ZeroOneMany<T> {
+func zom<T>(_ arr: [T]) -> ZeroOneMany<[T]> {
     switch arr.count {
     case 0:
         .zero
