@@ -35,9 +35,12 @@ let site: TreeRoot = .root(
     ),
 )
 
-try site.render(to: URL(fileURLWithPath: "_site", isDirectory: true))
-
-try await site.serve()
+switch CommandLine.arguments.dropFirst().first {
+case "serve":
+    try await site.serve()
+default:
+    try site.render(to: URL(fileURLWithPath: "_site", isDirectory: true))
+}
 
 // ---
 
