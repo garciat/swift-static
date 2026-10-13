@@ -21,7 +21,7 @@ func zom<T>(_ arr: [T]) -> ZeroOneMany<T> {
 
 struct Elem {
     let name: String
-    let attrs: [AttrTag: String]
+    let attrs: AttrMap
     let children: [Node]
 
     // https://developer.mozilla.org/en-US/docs/Glossary/Void_element
@@ -35,6 +35,7 @@ enum Node {
 
 // relative ordering for attributes
 enum AttrTag: Comparable, Hashable {
+    case id
     case name
     case content
     case href
@@ -54,36 +55,41 @@ enum Attr {
     case id(String)
     case lang(String)
 
-    func write(_ attrs: inout [AttrTag: String]) {
+    var components: (name: AttrTag, value: String) {
         switch self {
-        case .id(let val): attrs[.generic("id")] = val
-        case .lang(let val): attrs[.generic("lang")] = val
+        case .id(let val): (.id, val)
+        case .lang(let val): (.generic("lang"), val)
         }
     }
 }
 
 typealias AttrMap = [AttrTag: String]
 
-func dictAttrs(_ attrs: [Attr]) -> [AttrTag: String] {
-    var d: [AttrTag: String] = [:]
-    for attr in attrs {
-        attr.write(&d)
+extension AttrMap {
+    init(of attrs: [Attr]) {
+        self = .empty
+        for attr in attrs {
+            let c = attr.components
+            self[c.name] = c.value
+        }
     }
-    return d
-}
 
-// TODO: escape value
-func formatAttrs(_ attrs: [AttrTag: String]) -> String {
-    attrs
-        .sorted(by: { $0.key < $1.key })
-        .map { "\($0.key.value)=\"\($0.value)\"" }.joined(separator: " ")
+    // TODO: escape value
+    func format() -> String {
+        self.sorted(by: { $0.key < $1.key })
+            .map { "\($0.key.value)=\"\($0.value)\"" }.joined(separator: " ")
+    }
+
+    static var empty: AttrMap {
+        [:]
+    }
 }
 
 func formatOpen(_ elem: Elem) -> String {
     if elem.attrs.isEmpty {
         "<\(elem.name)>"
     } else {
-        "<\(elem.name) \(formatAttrs(elem.attrs))>"
+        "<\(elem.name) \(elem.attrs.format())>"
     }
 }
 
@@ -171,38 +177,37 @@ struct HtmlBuilder {
 }
 
 // Parent Element
-func e(_ name: String, attrs: [AttrTag: String] = [:], @HtmlBuilder _ content: () -> [Node]) -> Node
-{
+func e(_ name: String, attrs: AttrMap = .empty, @HtmlBuilder _ content: () -> [Node]) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: content(), isVoid: false))
 }
 
 // Parent Element
 func e(_ name: String, _ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
-    e(name, attrs: dictAttrs(attrs), content)
+    e(name, attrs: AttrMap(of: attrs), content)
 }
 
 // Parent Element
 func e(_ name: String, @HtmlBuilder content: () -> [Node]) -> Node {
-    e(name, attrs: [:], content)
+    e(name, attrs: .empty, content)
 }
 
 // Textual Element
-func e(_ name: String, _ text: String, attrs: [AttrTag: String] = [:]) -> Node {
+func e(_ name: String, _ text: String, attrs: AttrMap = .empty) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: [.text(text)], isVoid: false))
 }
 
 // Textual Element
 func e(_ name: String, _ text: String, _ attrs: Attr...) -> Node {
-    e(name, text, attrs: dictAttrs(attrs))
+    e(name, text, attrs: AttrMap(of: attrs))
 }
 
 // Void Element
-func e(_ name: String, attrs: [AttrTag: String]) -> Node {
+func e(_ name: String, attrs: AttrMap) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: [], isVoid: true))
 }
 
 func html(_ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
-    e("html", attrs: dictAttrs(attrs), content)
+    e("html", attrs: AttrMap(of: attrs), content)
 }
 
 func head(@HtmlBuilder content: () -> [Node]) -> Node {
@@ -214,7 +219,7 @@ func body(@HtmlBuilder content: () -> [Node]) -> Node {
 }
 
 func div(_ attrs: Attr..., @HtmlBuilder content: () -> [Node]) -> Node {
-    e("div", attrs: dictAttrs(attrs), content)
+    e("div", attrs: AttrMap(of: attrs), content)
 }
 
 func title(_ text: String) -> Node {
@@ -230,7 +235,7 @@ func p(_ text: String) -> Node {
 }
 
 func p(_ parts: Node...) -> Node {
-    e("p", attrs: [:]) { parts }
+    e("p", attrs: .empty) { parts }
 }
 
 func a(_ text: String, href: String) -> Node {
