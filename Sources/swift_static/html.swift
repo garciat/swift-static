@@ -165,7 +165,7 @@ func containsText(_ nodes: [Node]) -> Bool {
         case .text:
             return true
         case .fragment(let inner):
-            return containsText(inner)
+            if containsText(inner) { return true }
         default:
             continue
         }
