@@ -17,6 +17,42 @@ func zom<T>(_ arr: [T]) -> ZeroOneMany<[T]> {
     }
 }
 
+extension String {
+    var htmlEscaped: String {
+        var result = String()
+        result.reserveCapacity(utf8.count)
+
+        for scalar in unicodeScalars {
+            switch scalar {
+            case "&": result += "&amp;"
+            case "<": result += "&lt;"
+            case ">": result += "&gt;"
+            case "\"": result += "&quot;"
+            case "'": result += "&#39;"
+            default: result.unicodeScalars.append(scalar)
+            }
+        }
+
+        return result
+    }
+
+    var htmlAttributeEscaped: String {
+        var result = String()
+        result.reserveCapacity(utf8.count)
+
+        for scalar in unicodeScalars {
+            switch scalar {
+            case "&": result += "&amp;"
+            case "\"": result += "&quot;"
+            case "<": result += "&lt;"
+            default: result.unicodeScalars.append(scalar)
+            }
+        }
+
+        return result
+    }
+}
+
 // ---
 
 struct Elem {
@@ -88,10 +124,10 @@ extension AttrMap {
         }
     }
 
-    // TODO: escape value
     func format() -> String {
         self.sorted(by: { $0.key < $1.key })
-            .map { "\($0.key.value)=\"\($0.value)\"" }.joined(separator: " ")
+            .map { "\($0.key.value)=\"\($0.value.htmlAttributeEscaped)\"" }
+            .joined(separator: " ")
     }
 
     static var empty: AttrMap {
@@ -119,9 +155,8 @@ func formatEmpty(_ elem: Elem) -> String {
     }
 }
 
-// TODO: escape text
 func formatTextOnly(_ elem: Elem, _ text: String) -> String {
-    "\(formatOpen(elem))\(text)\(formatClose(elem))"
+    "\(formatOpen(elem))\(text.htmlEscaped)\(formatClose(elem))"
 }
 
 func containsText(_ nodes: [Node]) -> Bool {
@@ -156,7 +191,7 @@ func formatHtml(_ node: Node) -> String {
                 }
             }
         case .text(let it):
-            [it]
+            [it.htmlEscaped]
         case .fragment(let nodes):
             nodes.flatMap { go($0) }
         }
