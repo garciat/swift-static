@@ -1,22 +1,5 @@
 // ---
 
-enum ZeroOneMany<S: Sequence> {
-    case zero
-    case one(S.Element)
-    case many(S)
-}
-
-func zom<T>(_ arr: [T]) -> ZeroOneMany<[T]> {
-    switch arr.count {
-    case 0:
-        .zero
-    case 1:
-        .one(arr[0])
-    default:
-        .many(arr)
-    }
-}
-
 extension String {
     var htmlEscaped: String {
         var result = String()
@@ -147,62 +130,24 @@ func formatClose(_ elem: Elem) -> String {
     "</\(elem.name)>"
 }
 
-func formatEmpty(_ elem: Elem) -> String {
-    if elem.isVoid {
-        formatOpen(elem)
-    } else {
-        "\(formatOpen(elem))\(formatClose(elem))"
-    }
-}
-
-func formatTextOnly(_ elem: Elem, _ text: String) -> String {
-    "\(formatOpen(elem))\(text.htmlEscaped)\(formatClose(elem))"
-}
-
-func containsText(_ nodes: [Node]) -> Bool {
-    for node in nodes {
-        switch node {
-        case .text:
-            return true
-        case .fragment(let inner):
-            if containsText(inner) { return true }
-        default:
-            continue
-        }
-    }
-    return false
-}
-
 func formatHtml(_ node: Node) -> String {
-    func go(_ node: Node) -> [String] {
-        switch node {
-        case .elem(let elem):
-            switch zom(elem.children) {
-            case .zero:
-                [formatEmpty(elem)]
-            case .one(.text(let text)):
-                [formatTextOnly(elem, text)]
-            default:
-                if containsText(elem.children) {
-                    [
-                        formatOpen(elem),
-                        "  " + elem.children.flatMap { go($0) }.joined(),
-                        formatClose(elem),
-                    ]
-                } else {
-                    [formatOpen(elem)]
-                        + elem.children.flatMap { go($0) }.map { "  " + $0 }
-                        + [formatClose(elem)]
-                }
-            }
-        case .text(let it):
-            [it.htmlEscaped]
-        case .fragment(let nodes):
-            nodes.flatMap { go($0) }
+    switch node {
+    case .text(let it):
+        return it.htmlEscaped
+
+    case .fragment(let nodes):
+        return nodes.map(formatHtml).joined()
+
+    case .elem(let elem):
+        if elem.isVoid {
+            assert(elem.children.isEmpty, "void element should have no children")
+            return formatOpen(elem)
+        } else {
+            return formatOpen(elem)
+                + elem.children.map(formatHtml).joined()
+                + formatClose(elem)
         }
     }
-
-    return go(node).joined(separator: "\n")
 }
 
 func formatPage(_ root: Node) -> String {
