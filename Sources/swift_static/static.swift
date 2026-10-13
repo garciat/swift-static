@@ -32,9 +32,7 @@ enum TreeRoot {
                     s.data(using: .utf8)!
                 }
 
-            let mimeType =
-                path.fileExtension?.fileExtensionMimeType
-                ?? .defaultHttpMimeType
+            let mimeType = path.pathExtensionMimeType
 
             var paths = [path.absoluteString]
 
@@ -118,21 +116,15 @@ extension URL {
             ?? last
     }
 
-    var fileExtension: String.SubSequence? {
-        let last = lastPathComponent
-        return last.lastIndex(of: ".").map { last.suffix(from: $0) }
-    }
-}
-
-extension StringProtocol {
-    var fileExtensionMimeType: String {
-        switch self {
-        case ".html": "text/html"
-        default: .defaultHttpMimeType
+    var pathExtensionMimeType: String {
+        switch pathExtension {
+        case "html": "text/html"
+        case "css": "text/css"
+        case "js": "text/javascript"
+        case "json": "application/json"
+        case "png": "image/png"
+        case "jpg", "jpeg": "image/jpeg"
+        default: "application/octet-stream"
         }
-    }
-
-    static var defaultHttpMimeType: String {
-        "application/octet-stream"
     }
 }
