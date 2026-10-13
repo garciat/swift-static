@@ -140,7 +140,7 @@ extension URL {
 
 // helpers
 struct H {
-    static var baseURL: URL {
+    static let baseURL: URL = {
         let config =
             ProcessInfo.processInfo.environment["BASE_URL"]
             .map { $0.hasSuffix("/") ? $0 : $0 + "/" }
@@ -150,13 +150,15 @@ struct H {
         }
 
         return base
-    }
+    }()
 
     static func url(_ path: String, absolute: Bool = false) -> String {
         assert(path.starts(with: "/"))
 
-        let url = URL(string: String(path.dropFirst()), relativeTo: Self.baseURL)!
+        let relative = path == "/" ? "." : String(path.dropFirst())
 
-        return absolute ? url.absoluteString : url.path
+        let url = URL(string: relative, relativeTo: Self.baseURL)!
+
+        return absolute ? url.absoluteString : url.path(percentEncoded: true)
     }
 }
