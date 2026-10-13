@@ -12,11 +12,17 @@ let package = Package(
             targets: ["swift_static"]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/swhitty/FlyingFox.git", .upToNextMajor(from: "0.27.1"))
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .executableTarget(
             name: "swift_static",
+            dependencies: [
+                .product(name: "FlyingFox", package: "FlyingFox")
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency")
             ],
@@ -28,5 +34,6 @@ let package = Package(
                 .enableUpcomingFeature("ApproachableConcurrency")
             ],
         ),
-    ]
+
+    ],
 )

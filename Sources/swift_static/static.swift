@@ -1,3 +1,4 @@
+import FlyingFox
 import Foundation
 
 enum Response {
@@ -11,6 +12,38 @@ enum TreeRoot {
 
     static func root(index: Response? = nil, _ items: Tree...) -> TreeRoot {
         .root(index: index, items)
+    }
+
+    func serve(port: UInt16 = 3000) async throws {
+        let server = HTTPServer(port: port)
+
+        for (path, res) in flatten(URL(string: "/")!) {
+            let data =
+                switch res {
+                case .data(let data):
+                    data
+                case .html(let root):
+                    formatPage(root).data(using: .utf8)!
+                case .string(let s):
+                    s.data(using: .utf8)!
+                }
+
+            var paths = [path.absoluteString]
+
+            if path.lastPathComponent == "index.html" {
+                paths.append(path.deletingLastPathComponent().absoluteString)
+            }
+
+            for path in paths {
+                await server.appendRoute(path, for: ["GET"]) { request in
+                    HTTPResponse(statusCode: .ok, body: data)
+                }
+            }
+        }
+
+        print("Starting server on :\(port)")
+
+        try await server.run()
     }
 
     func render(to basePath: URL) throws {
