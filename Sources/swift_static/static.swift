@@ -6,48 +6,57 @@ enum Response {
     case string(String)
 }
 
-indirect enum Tree: Sendable {
+enum TreeRoot {
+    case root(index: Response? = nil, [Tree])
+
+    static func root(index: Response? = nil, _ items: Tree...) -> TreeRoot {
+        .root(index: index, items)
+    }
+
+    func render(to basePath: URL) throws {
+        for (path, res) in flatten(basePath) {
+            try FileManager.default.createDirectory(
+                at: path.deletingLastPathComponent(),
+                withIntermediateDirectories: true,
+            )
+
+            switch res {
+            case .data(let data):
+                try data.write(to: path)
+            case .html(let root):
+                try formatPage(root).write(to: path, atomically: true, encoding: .utf8)
+            case .string(let s):
+                try s.write(to: path, atomically: true, encoding: .utf8)
+            }
+        }
+    }
+
+    func flatten(_ basePath: URL) -> [(URL, Response)] {
+        switch self {
+        case .root(let index, let children):
+            (index.map { [(basePath.appendingPathComponent("index.html"), $0)] } ?? [])
+                + children.flatMap { $0.flatten(basePath) }
+        }
+    }
+}
+
+enum Tree {
     case file(String, Response)
-    case dir(String, Tree)
+    case dir(String, index: Response? = nil, [Tree])
 
-    case node(index: Response? = nil, [Tree])
-
-    static func node(index: Response? = nil, _ items: Tree...) -> Tree {
-        .node(index: index, items)
+    static func dir(_ name: String, index: Response? = nil, _ items: Tree...) -> Tree {
+        .dir(name, index: index, items)
     }
 
-    static func node(_ name: String, index: Response? = nil, _ items: Tree...) -> Tree {
-        .dir(name, .node(index: index, items))
-    }
-}
+    func flatten(_ basePath: URL) -> [(URL, Response)] {
+        switch self {
+        case .file(let name, let body):
+            return [(basePath.appendingPathComponent(name), body)]
+        case .dir(let name, let index, let children):
+            let next = basePath.appendingPathComponent(name, isDirectory: true)
 
-func BaseLayout(title theTitle: String, @HtmlBuilder content: () -> [Node]) -> Node {
-    html(.lang("en")) {
-        head {
-            meta(charset: "utf-8")
-            meta(.viewport(.width(.deviceWidth), .initialScale(1)))
-
-            title(theTitle)
-        }
-        body {
-            content()
+            return (index.map { [(next.appendingPathComponent("index.html"), $0)] } ?? [])
+                + children.flatMap { $0.flatten(next) }
         }
     }
 }
-
-func IndexPage() -> Node {
-    BaseLayout(title: "Gabriel Garcia") {
-        h1("Gabriel Garcia")
-        for i in 0..<10 {
-            p("\(i)")
-        }
-    }
-}
-
-let site: Tree = .node(
-    index: .html(IndexPage()),
-    .node(
-        "posts",
-        index: .string("hi")
-    ),
-)
