@@ -207,16 +207,6 @@ func e(_ name: String, @HtmlBuilder content: () -> Node) -> Node {
     e(name, attrs: .empty, content)
 }
 
-// Textual Element
-func e(_ name: String, _ text: String, attrs: AttrMap = .empty) -> Node {
-    .elem(Elem(name: name, attrs: attrs, children: [.text(text)], isVoid: false))
-}
-
-// Textual Element
-func e(_ name: String, _ text: String, _ attrs: Attr...) -> Node {
-    e(name, text, attrs: AttrMap(of: attrs))
-}
-
 // Void Element
 func e(_ name: String, attrs: AttrMap) -> Node {
     .elem(Elem(name: name, attrs: attrs, children: [], isVoid: true))
@@ -239,23 +229,19 @@ func div(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
 }
 
 func title(_ text: String) -> Node {
-    e("title", text)
+    e("title") { text }
 }
 
 func h1(_ text: String) -> Node {
-    e("h1", text)
+    e("h1") { text }
 }
 
 func p(_ text: String) -> Node {
-    e("p", text)
+    e("p") { text }
 }
 
-func p(_ parts: Node...) -> Node {
-    e("p", attrs: .empty) { parts }
-}
-
-func a(_ text: String, href: String) -> Node {
-    e("a", text, attrs: [.generic("href"): href])
+func a(href: String, @HtmlBuilder content: () -> Node) -> Node {
+    e("a", attrs: [.href: href], content)
 }
 
 enum ViewportWidth {

@@ -14,7 +14,7 @@ private struct DocumentToNodes: MarkupVisitor {
     }
 
     mutating func visitHeading(_ heading: Heading) -> [Node] {
-        [e("h\(heading.level)", heading.plainText)]
+        [e("h\(heading.level)") { heading.plainText }]
     }
 
     mutating func visitParagraph(_ paragraph: Paragraph) -> [Node] {
