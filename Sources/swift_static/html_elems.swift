@@ -43,6 +43,10 @@ func meta(name: String, content: String) -> Node {
     return e("meta", attrs: [.name: name, .content: content])
 }
 
+func link(stylesheetURL: String) -> Node {
+    return e("link", attrs: [.rel: "stylesheet", .href: stylesheetURL])
+}
+
 func body(@HtmlBuilder content: () -> Node) -> Node {
     e("body", content)
 }

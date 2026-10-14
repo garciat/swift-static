@@ -25,6 +25,7 @@ enum AttrTag: Comparable, Hashable {
     case id
     case name
     case content
+    case rel
     case href
     case src
     case alt
@@ -35,6 +36,7 @@ enum AttrTag: Comparable, Hashable {
 
 enum Attr {
     case id(String)
+    case `class`(String)
     case lang(String)
 }
 
@@ -58,6 +60,7 @@ extension Attr {
     var components: (name: AttrTag, value: String) {
         switch self {
         case .id(let val): (.id, val)
+        case .class(let val): (.class, val)
         case .lang(let val): (.generic("lang"), val)
         }
     }

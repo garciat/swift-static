@@ -19,6 +19,26 @@
             "target": "swift-static",
             "configuration": "release",
             "preLaunchTask": "swift: Build Release swift-static"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-static}",
+            "name": "Debug HLJS",
+            "target": "HLJS",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug HLJS"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:swift-static}",
+            "name": "Release HLJS",
+            "target": "HLJS",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release HLJS"
         }
     ]
 }

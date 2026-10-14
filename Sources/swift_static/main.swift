@@ -69,6 +69,10 @@ func BaseLayout(title theTitle: String, @HtmlBuilder content: () -> Node) -> Nod
             meta(name: "viewport", content: "width=device-width,initial-scale=1.0")
 
             title(theTitle)
+
+            link(
+                stylesheetURL:
+                    "https://unpkg.com/@highlightjs/cdn-assets@11.12.0/styles/github.min.css")
         }
         body {
             content()

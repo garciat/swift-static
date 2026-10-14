@@ -1,3 +1,4 @@
+import HLJS
 import Markdown
 
 func markdown(_ raw: String) -> Node {
@@ -72,7 +73,9 @@ private struct DocumentToNodes: MarkupVisitor {
         codeAttrs[.class] = codeBlock.language.map { "language-" + $0 }
 
         return e("pre") {
-            e("code", attrs: codeAttrs) { codeBlock.code }
+            e("code", attrs: codeAttrs) {
+                highlightedCode(codeBlock.code, language: codeBlock.language)
+            }
         }
     }
 
@@ -117,4 +120,32 @@ private struct DocumentToNodes: MarkupVisitor {
     private mutating func visitChildren(_ markup: any Markdown.Markup) -> [Node] {
         markup.children.compactMap { $0.accept(&self) }
     }
+}
+
+private func highlightedCode(_ code: String, language: String?) -> Node {
+    guard let language = language else {
+        return .text(code)
+    }
+
+    do {
+        let highlighter = try Highlighter()
+        let result = try highlighter.highlight(code, language: language)
+        return renderTokens(result.tokens)
+    } catch {
+        print("[ERROR] highlight: \(error)")
+        return .text(code)
+    }
+}
+
+private func renderTokens(_ tokens: [HighlightToken]) -> Node {
+    .fragment(
+        // NOTE: assumes hljs has html-escaped the code
+        tokens.map { token in
+            if let kind = token.kind {
+                return e("span", .class(kind)) { .raw(token.text) }
+            } else {
+                return .raw(token.text)
+            }
+        }
+    )
 }

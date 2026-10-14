@@ -18,7 +18,18 @@ date: 2026-10-13
 3. Why not
 
 ```swift
-[1, 2, 3].map { $0 * 10 }
+extension CharacterSet {
+    static let urlPathComponentAllowed: CharacterSet = {
+        CharacterSet(charactersIn: "A"..."Z")
+            | CharacterSet(charactersIn: "a"..."z")
+            | CharacterSet(charactersIn: "0"..."9")
+            | CharacterSet(charactersIn: "-._~")
+    }()
+
+    static func | (lhs: CharacterSet, rhs: CharacterSet) -> CharacterSet {
+        return lhs.union(rhs)
+    }
+}
 ```
 
 ## What

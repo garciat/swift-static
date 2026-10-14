@@ -26,12 +26,19 @@ let package = Package(
         .executableTarget(
             name: "swift_static",
             dependencies: [
+                "HLJS",
                 .product(name: "FlyingFox", package: "FlyingFox"),
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "Yams", package: "Yams"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("ApproachableConcurrency")
+            ],
+        ),
+        .target(
+            name: "HLJS",
+            resources: [
+                .process("Resources")
             ],
         ),
         .testTarget(
