@@ -117,27 +117,6 @@ enum Tree {
     }
 }
 
-extension URL {
-    var fileName: String {
-        let last = lastPathComponent
-        return last.lastIndex(of: ".")
-            .map { String(last.prefix(upTo: $0)) }
-            ?? last
-    }
-
-    var pathExtensionMimeType: String {
-        switch pathExtension {
-        case "html": "text/html"
-        case "css": "text/css"
-        case "js": "text/javascript"
-        case "json": "application/json"
-        case "png": "image/png"
-        case "jpg", "jpeg": "image/jpeg"
-        default: "application/octet-stream"
-        }
-    }
-}
-
 // helpers
 struct H {
     static let baseURL: URL = {

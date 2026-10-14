@@ -26,6 +26,7 @@ func loadArticles<T: Codable>(_ type: T.Type, from dirPath: URL) throws -> [Arti
             return Article(path: $0, meta: meta, body: body)
         }
 }
+
 func parseFrontmatter(_ raw: String) -> (frontmatter: String, body: String) {
     let pattern =
         #/(?ms)\A---[ \t]*\R(?<frontmatter>.*?)(?:\R)?^---[ \t]*(?:\R|\z)(?<body>.*)\z/#
