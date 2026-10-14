@@ -26,7 +26,7 @@ let posts =
     try loadArticles(PostMeta.self, from: URL(filePath: "example/posts"))
     .sorted { $0.meta.date > $1.meta.date }
 
-let site: TreeRoot = .root(
+let site: Site = .root(
     index: .html(IndexPage(posts)),
     .dir(
         Article<PostMeta>.dirName,

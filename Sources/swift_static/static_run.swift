@@ -1,7 +1,7 @@
 import FlyingFox
 import Foundation
 
-extension TreeRoot {
+extension Site {
     func main() async throws {
         switch CommandLine.arguments.dropFirst().first {
         case "serve":

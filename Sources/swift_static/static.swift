@@ -10,10 +10,10 @@ enum Response {
     }
 }
 
-enum TreeRoot {
+enum Site {
     case root(index: Response? = nil, [Tree])
 
-    static func root(index: Response? = nil, _ items: Tree...) -> TreeRoot {
+    static func root(index: Response? = nil, _ items: Tree...) -> Site {
         .root(index: index, items)
     }
 }
