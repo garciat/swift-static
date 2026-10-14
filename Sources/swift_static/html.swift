@@ -53,7 +53,10 @@ struct VElem {
 enum Node {
     case elem(Elem)
     case void(VElem)
+
+    case raw(String)
     case text(String)
+
     case fragment([Node])
 
     func flattened() -> [Node] {
@@ -148,8 +151,11 @@ func formatClose(_ elem: Elem) -> String {
 
 func formatHtml(_ node: Node) -> String {
     switch node {
-    case .text(let it):
-        return it.htmlEscaped
+    case .text(let value):
+        return value.htmlEscaped
+
+    case .raw(let value):
+        return value
 
     case .fragment(let nodes):
         return nodes.map(formatHtml).joined()
