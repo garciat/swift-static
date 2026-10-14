@@ -57,10 +57,7 @@ extension String {
 
 extension URL {
     var fileName: String {
-        let last = lastPathComponent
-        return last.lastIndex(of: ".")
-            .map { String(last.prefix(upTo: $0)) }
-            ?? last
+        deletingPathExtension().lastPathComponent
     }
 
     var pathExtensionMimeType: String {
