@@ -42,13 +42,17 @@ struct Elem {
     let name: String
     let attrs: AttrMap
     let children: [Node]
+}
 
-    // https://developer.mozilla.org/en-US/docs/Glossary/Void_element
-    let isVoid: Bool
+// https://developer.mozilla.org/en-US/docs/Glossary/Void_element
+struct VElem {
+    let name: String
+    let attrs: AttrMap
 }
 
 enum Node {
     case elem(Elem)
+    case void(VElem)
     case text(String)
     case fragment([Node])
 
@@ -130,6 +134,14 @@ func formatOpen(_ elem: Elem) -> String {
     }
 }
 
+func formatOpen(_ elem: VElem) -> String {
+    if elem.attrs.isEmpty {
+        "<\(elem.name)>"
+    } else {
+        "<\(elem.name) \(elem.attrs.format())>"
+    }
+}
+
 func formatClose(_ elem: Elem) -> String {
     "</\(elem.name)>"
 }
@@ -143,14 +155,12 @@ func formatHtml(_ node: Node) -> String {
         return nodes.map(formatHtml).joined()
 
     case .elem(let elem):
-        if elem.isVoid {
-            assert(elem.children.isEmpty, "void element should have no children")
-            return formatOpen(elem)
-        } else {
-            return formatOpen(elem)
-                + elem.children.map(formatHtml).joined()
-                + formatClose(elem)
-        }
+        return formatOpen(elem)
+            + elem.children.map(formatHtml).joined()
+            + formatClose(elem)
+
+    case .void(let elem):
+        return formatOpen(elem)
     }
 }
 
@@ -187,7 +197,7 @@ struct HtmlBuilder {
 
 // Parent Element
 func e(_ name: String, attrs: AttrMap = .empty, children: [Node]) -> Node {
-    .elem(Elem(name: name, attrs: attrs, children: children, isVoid: false))
+    .elem(Elem(name: name, attrs: attrs, children: children))
 }
 
 // Parent Element
@@ -207,7 +217,7 @@ func e(_ name: String, @HtmlBuilder content: () -> Node) -> Node {
 
 // Void Element
 func e(_ name: String, attrs: AttrMap = .empty) -> Node {
-    .elem(Elem(name: name, attrs: attrs, children: [], isVoid: true))
+    .void(VElem(name: name, attrs: attrs))
 }
 
 func html(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
