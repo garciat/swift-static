@@ -1,5 +1,5 @@
 {
-  "originHash" : "37797ea695cdf890d03d466032fa338b4f79c0f915b6dbf9e26b00486f39a2de",
+  "originHash" : "156014d69229bba8a3fb3167a766f5ca1d105113ad94cbcdfc4a0251fa49cf4f",
   "pins" : [
     {
       "identity" : "flyingfox",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "4e246d3fb515bd2069e5c169abdc75808b90548f",
         "version" : "0.27.1"
+      }
+    },
+    {
+      "identity" : "jxkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jectivex/JXKit.git",
+      "state" : {
+        "revision" : "a4c1872d36036fe4ade4b1cadb268603e89e25f0",
+        "version" : "3.6.0"
       }
     },
     {

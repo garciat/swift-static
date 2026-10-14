@@ -13,6 +13,11 @@ jobs:
           swift-version: "6.4"
           skip-verify-signature: true
 
+      - name: Install JavaScriptCore
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjavascriptcoregtk-4.1-dev
+
       - uses: actions/checkout@v6
 
       - name: Build project

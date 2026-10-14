@@ -1,4 +1,5 @@
-import JavaScriptCore
+import Foundation
+import JXKit
 
 public struct Highlighted {
     public let tokens: [HighlightToken]
@@ -15,24 +16,21 @@ public enum HLJSInitError: Error {
     case contextMissing
     case libraryMissing
     case libraryUnloadable
+    case libraryError(any Error)
     case libraryInvalid
 }
 
 public enum HighlightError: Error {
     case languageNotFound
-    case resultNotFound
-    case valueNotFound
     case valueInvalid
     case failed
 }
 
 public struct Highlighter {
-    private let hljs: JSValue
+    private let hljs: JXValue
 
     public init() throws(HLJSInitError) {
-        guard let context = JSContext() else {
-            throw .contextMissing
-        }
+        let context = JXContext()
 
         guard let hljsURL = Bundle.module.url(forResource: "hljs.min", withExtension: "js") else {
             throw .libraryMissing
@@ -42,24 +40,26 @@ public struct Highlighter {
             throw .libraryUnloadable
         }
 
-        context.evaluateScript(hljsCode)
-
-        guard let hljs = context.objectForKeyedSubscript("hljs") else {
-            throw .libraryInvalid
+        do {
+            try context.eval(hljsCode)
+        } catch {
+            throw .libraryError(error)
         }
 
-        self.hljs = hljs
+        do {
+            self.hljs = try context.global["hljs"]
+        } catch {
+            throw .libraryInvalid
+        }
     }
 
     public func highlight(_ code: String, language: String, ignoreIllegals: Bool = true)
-        throws(HighlightError) -> Highlighted
+        throws -> Highlighted
     {
-        guard let languageFound = hljs.invokeMethod("getLanguage", withArguments: [language]) else {
-            throw .languageNotFound
-        }
+        let languageFound = try hljs.invokeMethod("getLanguage", withArguments: [language])
 
         if languageFound.isUndefined {
-            throw .languageNotFound
+            throw HighlightError.languageNotFound
         }
 
         let options: [String: Any] = [
@@ -67,27 +67,20 @@ public struct Highlighter {
             "ignoreIllegals": ignoreIllegals,
         ]
 
-        guard
-            let result = hljs.invokeMethod(
-                "highlight",
-                withArguments: [code, options],
-            )
-        else {
-            throw .resultNotFound
+        let result = try hljs.invokeMethod(
+            "highlight",
+            withArguments: [code, options],
+        )
+
+        let value = try result["value"]
+
+        if value.isUndefined {
+            throw HighlightError.failed
         }
 
-        if result.objectForKeyedSubscript("value").isUndefined {
-            throw .failed
-        }
+        let language = try result["language"].string
 
-        guard
-            let value = result.objectForKeyedSubscript("value").toString(),
-            let language = result.objectForKeyedSubscript("language").toString()
-        else {
-            throw .valueNotFound
-        }
-
-        let tokens = try tokenize(value)
+        let tokens = try tokenize(value.string)
 
         return Highlighted(tokens: tokens, language: language)
     }

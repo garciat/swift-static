@@ -19,6 +19,7 @@ let package = Package(
         .package(url: "https://github.com/swhitty/FlyingFox.git", .upToNextMajor(from: "0.27.1")),
         .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.3"),
+        .package(url: "https://github.com/jectivex/JXKit.git", .upToNextMajor(from: "3.0.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -37,6 +38,9 @@ let package = Package(
         ),
         .target(
             name: "HLJS",
+            dependencies: [
+                .product(name: "JXKit", package: "JXKit")
+            ],
             resources: [
                 .process("Resources")
             ],
