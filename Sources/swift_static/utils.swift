@@ -1,16 +1,21 @@
 import Foundation
 
 extension CharacterSet {
-    static var urlPathSegmentAllowed: CharacterSet {
-        CharacterSet(
-            charactersIn: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()"
-        )
+    static let urlPathComponentAllowed: CharacterSet = {
+        CharacterSet(charactersIn: "A"..."Z")
+            | CharacterSet(charactersIn: "a"..."z")
+            | CharacterSet(charactersIn: "0"..."9")
+            | CharacterSet(charactersIn: "-._~")
+    }()
+
+    static func | (lhs: CharacterSet, rhs: CharacterSet) -> CharacterSet {
+        return lhs.union(rhs)
     }
 }
 
 extension String {
     var encodedURIComponent: String {
-        addingPercentEncoding(withAllowedCharacters: .urlPathSegmentAllowed)!
+        addingPercentEncoding(withAllowedCharacters: .urlPathComponentAllowed)!
     }
 }
 
