@@ -1,7 +1,7 @@
 import HLJS
 import Markdown
 
-func markdown(_ raw: String) -> Node {
+public func markdown(_ raw: String) -> Node {
     var visitor = DocumentToNodes()
     let doc = Document(parsing: raw)
     return doc.accept(&visitor)

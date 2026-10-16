@@ -1,6 +1,6 @@
 import Foundation
 
-enum Response {
+public enum Response {
     case data(Data)
     case html(Node)
     case string(String)
@@ -10,26 +10,26 @@ enum Response {
     }
 }
 
-enum Site {
+public enum Site {
     case root(index: Response? = nil, [Tree])
 
-    static func root(index: Response? = nil, _ items: Tree...) -> Site {
+    public static func root(index: Response? = nil, _ items: Tree...) -> Site {
         .root(index: index, items)
     }
 }
 
-enum Tree {
+public enum Tree {
     case file(String, Response)
     case dir(String, index: Response? = nil, [Tree])
 
-    static func dir(_ name: String, index: Response? = nil, _ items: Tree...) -> Tree {
+    public static func dir(_ name: String, index: Response? = nil, _ items: Tree...) -> Tree {
         .dir(name, index: index, items)
     }
 }
 
 // helpers
-struct H {
-    static let baseURL: URL = {
+public struct H {
+    public static let baseURL: URL = {
         let config =
             ProcessInfo.processInfo.environment["BASE_URL"]
             .map { $0.hasSuffix("/") ? $0 : $0 + "/" }
@@ -41,7 +41,7 @@ struct H {
         return base
     }()
 
-    static func url(_ path: String, absolute: Bool = false) -> String {
+    public static func url(_ path: String, absolute: Bool = false) -> String {
         assert(path.starts(with: "/"))
 
         let relative = path == "/" ? "." : String(path.dropFirst())

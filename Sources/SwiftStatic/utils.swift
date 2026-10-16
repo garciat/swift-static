@@ -14,7 +14,7 @@ extension CharacterSet {
 }
 
 extension String {
-    var encodedURIComponent: String {
+    public var encodedURIComponent: String {
         addingPercentEncoding(withAllowedCharacters: .urlPathComponentAllowed)!
     }
 }
@@ -56,7 +56,7 @@ extension String {
 }
 
 extension URL {
-    var fileName: String {
+    public var fileName: String {
         deletingPathExtension().lastPathComponent
     }
 

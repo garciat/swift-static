@@ -2,7 +2,7 @@ import FlyingFox
 import Foundation
 
 extension Site {
-    func main() async throws {
+    public func main() async throws {
         switch CommandLine.arguments.dropFirst().first {
         case "serve":
             try await serve()

@@ -1,16 +1,16 @@
-struct Elem {
+public struct Elem {
     let name: String
     let attrs: AttrMap
     let children: [Node]
 }
 
 // https://developer.mozilla.org/en-US/docs/Glossary/Void_element
-struct VElem {
+public struct VElem {
     let name: String
     let attrs: AttrMap
 }
 
-enum Node {
+public enum Node {
     case elem(Elem)
     case void(VElem)
 
@@ -21,7 +21,7 @@ enum Node {
 }
 
 // relative ordering for attributes
-enum AttrTag: Comparable, Hashable {
+public enum AttrTag: Comparable, Hashable {
     case id
     case name
     case content
@@ -34,13 +34,13 @@ enum AttrTag: Comparable, Hashable {
     case generic(String)
 }
 
-enum Attr {
+public enum Attr {
     case id(String)
     case `class`(String)
     case lang(String)
 }
 
-typealias AttrMap = [AttrTag: String]
+public typealias AttrMap = [AttrTag: String]
 
 extension AttrMap {
     init(of attrs: [Attr]) {

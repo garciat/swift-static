@@ -1,26 +1,26 @@
 @resultBuilder
-struct HtmlBuilder {
-    static func buildExpression(_ expression: String) -> Node {
+public struct HtmlBuilder {
+    public static func buildExpression(_ expression: String) -> Node {
         .text(expression)
     }
 
-    static func buildExpression(_ expression: Node) -> Node {
+    public static func buildExpression(_ expression: Node) -> Node {
         expression
     }
 
-    static func buildExpression(_ expression: [Node]) -> Node {
+    public static func buildExpression(_ expression: [Node]) -> Node {
         .fragment(flattening: expression)
     }
 
-    static func buildBlock(_ components: Node...) -> Node {
+    public static func buildBlock(_ components: Node...) -> Node {
         .fragment(flattening: components)
     }
 
-    static func buildArray(_ components: [Node]) -> Node {
+    public static func buildArray(_ components: [Node]) -> Node {
         .fragment(flattening: components)
     }
 
-    static func buildOptional(_ component: Node?) -> Node {
+    public static func buildOptional(_ component: Node?) -> Node {
         component ?? .fragment([])
     }
 }

@@ -30,7 +30,7 @@ jobs:
       - name: Build site
         env:
           BASE_URL: ${{ steps.setup-pages.outputs.base_url }}
-        run: BASE_URL="$BASE_URL" swift run swift-static
+        run: BASE_URL="$BASE_URL" swift run demo-site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

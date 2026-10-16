@@ -23,47 +23,47 @@ func e(_ name: String, attrs: AttrMap = .empty) -> Node {
     .void(VElem(name: name, attrs: attrs))
 }
 
-func html(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
+public func html(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e("html", attrs: AttrMap(of: attrs), content)
 }
 
-func head(@HtmlBuilder content: () -> Node) -> Node {
+public func head(@HtmlBuilder content: () -> Node) -> Node {
     e("head", content)
 }
 
-func title(_ text: String) -> Node {
+public func title(_ text: String) -> Node {
     e("title") { text }
 }
 
-func meta(charset: String) -> Node {
+public func meta(charset: String) -> Node {
     e("meta", attrs: [.generic("charset"): charset])
 }
 
-func meta(name: String, content: String) -> Node {
+public func meta(name: String, content: String) -> Node {
     return e("meta", attrs: [.name: name, .content: content])
 }
 
-func link(stylesheetURL: String) -> Node {
+public func link(stylesheetURL: String) -> Node {
     return e("link", attrs: [.rel: "stylesheet", .href: stylesheetURL])
 }
 
-func body(@HtmlBuilder content: () -> Node) -> Node {
+public func body(@HtmlBuilder content: () -> Node) -> Node {
     e("body", content)
 }
 
-func div(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
+public func div(_ attrs: Attr..., @HtmlBuilder content: () -> Node) -> Node {
     e("div", attrs: AttrMap(of: attrs), content)
 }
 
-func h1(_ text: String) -> Node {
+public func h1(_ text: String) -> Node {
     e("h1") { text }
 }
 
-func p(_ text: String) -> Node {
+public func p(_ text: String) -> Node {
     e("p") { text }
 }
 
-func ul<S: Sequence>(_ items: S, @HtmlBuilder content: (S.Element) -> Node) -> Node {
+public func ul<S: Sequence>(_ items: S, @HtmlBuilder content: (S.Element) -> Node) -> Node {
     e("ul") {
         for item in items {
             content(item)
@@ -71,10 +71,10 @@ func ul<S: Sequence>(_ items: S, @HtmlBuilder content: (S.Element) -> Node) -> N
     }
 }
 
-func li(@HtmlBuilder content: () -> Node) -> Node {
+public func li(@HtmlBuilder content: () -> Node) -> Node {
     e("li", content)
 }
 
-func a(href: String, @HtmlBuilder content: () -> Node) -> Node {
+public func a(href: String, @HtmlBuilder content: () -> Node) -> Node {
     e("a", attrs: [.href: href], content)
 }

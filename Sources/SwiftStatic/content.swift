@@ -1,13 +1,13 @@
 import Foundation
 import Yams
 
-struct Article<T> {
-    let path: URL
-    let meta: T
-    let body: String
+public struct Article<T> {
+    public let path: URL
+    public let meta: T
+    public let body: String
 }
 
-func loadArticles<T: Codable>(_ type: T.Type, from dirPath: URL) throws -> [Article<T>] {
+public func loadArticles<T: Codable>(_ type: T.Type, from dirPath: URL) throws -> [Article<T>] {
     assert(dirPath.isFileURL)
 
     let children = try FileManager.default.contentsOfDirectory(
