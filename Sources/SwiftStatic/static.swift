@@ -10,19 +10,32 @@ public enum Response {
     }
 }
 
-public enum Site {
-    case root(index: Response? = nil, [Tree])
+public struct TreeNode {
+    let index: Response?
+    let children: [TreeItem]
+}
 
-    public static func root(index: Response? = nil, _ items: Tree...) -> Site {
-        .root(index: index, items)
+public enum TreeItem {
+    case file(String, Response)
+    case dir(String, TreeNode)
+}
+
+public typealias Site = TreeNode
+
+extension Site {
+    public static func root(index: Response? = nil, _ items: TreeItem...) -> Site {
+        TreeNode(index: index, children: items)
     }
 }
 
-public enum Tree {
-    case file(String, Response)
-    case dir(String, index: Response? = nil, [Tree])
+extension TreeItem {
+    public static func dir(_ name: String, index: Response? = nil, _ items: [TreeItem]) -> TreeItem
+    {
+        .dir(name, TreeNode(index: index, children: items))
+    }
 
-    public static func dir(_ name: String, index: Response? = nil, _ items: Tree...) -> Tree {
+    public static func dir(_ name: String, index: Response? = nil, _ items: TreeItem...) -> TreeItem
+    {
         .dir(name, index: index, items)
     }
 }
