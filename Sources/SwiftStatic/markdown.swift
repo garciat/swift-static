@@ -130,22 +130,21 @@ private func highlightedCode(_ code: String, language: String?) -> Node {
     do {
         let highlighter = try Highlighter()
         let result = try highlighter.highlight(code, language: language)
-        return renderTokens(result.tokens)
+        return .fragment(renderTokens(result.tokens))
     } catch {
         print("[ERROR] highlight: \(error)")
         return .text(code)
     }
 }
 
-private func renderTokens(_ tokens: [HighlightToken]) -> Node {
-    .fragment(
-        // NOTE: assumes hljs has html-escaped the code
-        tokens.map { token in
-            if let kind = token.kind {
-                return e("span", .class(kind)) { .raw(token.text) }
-            } else {
-                return .raw(token.text)
-            }
+private func renderTokens(_ tokens: [HighlightToken]) -> [Node] {
+    // NOTE: assumes hljs has html-escaped the code
+    tokens.map { token in
+        switch token {
+        case .text(let text):
+            .raw(text)
+        case .tag(let labels, let contents):
+            e("span", .class(labels)) { renderTokens(contents) }
         }
-    )
+    }
 }

@@ -30,6 +30,8 @@ extension CharacterSet {
         return lhs.union(rhs)
     }
 }
+
+_ = "asd \(123)"
 ```
 
 ## What

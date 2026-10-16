@@ -6,10 +6,9 @@ public struct Highlighted {
     public let language: String
 }
 
-public struct HighlightToken {
-    // https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html
-    public let kind: String?
-    public let text: String
+public enum HighlightToken {
+    case text(String)
+    case tag(String, [Self])
 }
 
 public enum HLJSInitError: Error {
@@ -24,6 +23,13 @@ public enum HighlightError: Error {
     case languageNotFound
     case valueInvalid
     case failed
+}
+
+public enum TokenizationError: Error {
+    case excessiveDepth
+    case unexpectedClosingTag
+    case invalidOpeningTag
+    case missingClosingTag
 }
 
 public struct Highlighter {
@@ -80,45 +86,86 @@ public struct Highlighter {
 
         let language = try result["language"].string
 
-        let tokens = try tokenize(value.string)
+        let tokens = try Tokenizer.tokenize(value.string)
 
         return Highlighted(tokens: tokens, language: language)
     }
 }
 
-private func tokenize(_ output: String) throws(HighlightError) -> [HighlightToken] {
-    let spanPattern = /<span class="(?<kind>[^"]+)">(?<text>[^<]+)<\/span>/
-
-    var tokens = [HighlightToken]()
-
-    var text = output[...]
-
-    while !text.isEmpty {
-        let nextSpan = text.firstIndex(of: "<") ?? text.endIndex
-
-        let plain = text[..<nextSpan]
-
-        if !plain.isEmpty {
-            tokens.append(HighlightToken(kind: nil, text: String(plain)))
-        }
-
-        if nextSpan == text.endIndex {
-            break
-        }
-
-        guard let match = text[nextSpan...].firstMatch(of: spanPattern) else {
-            throw .valueInvalid
-        }
-
-        tokens.append(
-            HighlightToken(
-                kind: String(match.output.kind),
-                text: String(match.output.text),
-            )
-        )
-
-        text = text[match.range.upperBound...]
+private struct Tokenizer {
+    static func tokenize(_ source: String) throws(TokenizationError) -> [HighlightToken] {
+        var input = source[...]
+        return try enter(&input, level: 0)
     }
 
-    return tokens
+    private static func enter(_ input: inout String.SubSequence, level: Int)
+        throws(TokenizationError)
+        -> [HighlightToken]
+    {
+        if level > 10 {
+            throw .excessiveDepth
+        }
+
+        var tokens = [HighlightToken]()
+
+        while true {
+            if let leading = input.pop(whileNot: "<") {
+                tokens.append(.text(String(leading)))
+            }
+
+            if input.isEmpty {
+                break
+            }
+
+            assert(input.first == "<")
+
+            if input.starts(with: "</") {
+                if level > 0 {
+                    break
+                } else {
+                    throw .unexpectedClosingTag
+                }
+            }
+
+            guard let match = input.pop(prefix: /<span class="(?<labels>[^"]+)">/) else {
+                throw .invalidOpeningTag
+            }
+
+            let contents = try enter(&input, level: level + 1)
+
+            tokens.append(.tag(String(match.output.labels), contents))
+
+            guard input.pop(prefix: "</span>") else {
+                throw .missingClosingTag
+            }
+        }
+
+        return tokens
+    }
+}
+
+extension String.SubSequence {
+    fileprivate mutating func pop(whileNot delimiter: Character) -> Self? {
+        let end = firstIndex(of: delimiter) ?? endIndex
+        let out = self[..<end]
+        self = self[end...]
+        return out.isEmpty ? nil : out
+    }
+
+    fileprivate mutating func pop(prefix: Self) -> Bool {
+        guard starts(with: prefix) else {
+            return false
+        }
+        self = dropFirst(prefix.count)
+        return true
+    }
+
+    fileprivate mutating func pop<R>(prefix regex: R) -> Regex<R.RegexOutput>.Match?
+    where R: RegexComponent {
+        guard let match = prefixMatch(of: regex) else {
+            return nil
+        }
+        self = self[match.range.upperBound...]
+        return match
+    }
 }
