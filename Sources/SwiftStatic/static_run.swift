@@ -71,25 +71,34 @@ extension Site {
         print("[render]", "done")
     }
 
-    func flatten(_ basePath: URL) -> [(URL, Response)] {
+    func flatten(_ base: URL) -> [(URL, Response)] {
         switch self {
         case .root(let index, let children):
-            (index.map { [(basePath.appendingPathComponent("index.html"), $0)] } ?? [])
-                + children.flatMap { $0.flatten(basePath) }
+            flattenDir(
+                onto: base,
+                index: index,
+                children: children,
+            )
         }
     }
 }
 
 extension Tree {
-    func flatten(_ basePath: URL) -> [(URL, Response)] {
+    func flatten(_ base: URL) -> [(URL, Response)] {
         switch self {
         case .file(let name, let body):
-            return [(basePath.appendingPathComponent(name), body)]
+            [(base.appendingPathComponent(name), body)]
         case .dir(let name, let index, let children):
-            let next = basePath.appendingPathComponent(name, isDirectory: true)
-
-            return (index.map { [(next.appendingPathComponent("index.html"), $0)] } ?? [])
-                + children.flatMap { $0.flatten(next) }
+            flattenDir(
+                onto: base.appendingPathComponent(name, isDirectory: true),
+                index: index,
+                children: children,
+            )
         }
     }
+}
+
+func flattenDir(onto path: URL, index: Response?, children: [Tree]) -> [(URL, Response)] {
+    (index.map { [(path.appendingPathComponent("index.html"), $0)] } ?? [])
+        + children.flatMap { $0.flatten(path) }
 }
