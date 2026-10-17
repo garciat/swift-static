@@ -1,5 +1,5 @@
 {
-  "originHash" : "156014d69229bba8a3fb3167a766f5ca1d105113ad94cbcdfc4a0251fa49cf4f",
+  "originHash" : "52686290ff444882007184991de2cc2be0d0d19967b4c2e9e2b8e44fbc7b4702",
   "pins" : [
     {
       "identity" : "flyingfox",
@@ -31,10 +31,10 @@
     {
       "identity" : "swift-markdown",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-markdown.git",
+      "location" : "https://github.com/sindresorhus/swift-markdown.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "392b73b858efe3dacec0e8a91c6e7fd19af0bb98"
+        "branch" : "sindre-improvements",
+        "revision" : "72692e0ce7f27549ad4b6057635a9e27d7431e2a"
       }
     },
     {

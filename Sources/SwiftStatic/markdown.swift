@@ -10,8 +10,13 @@ public func markdown(_ raw: String) -> Node {
 private struct DocumentToNodes: MarkupVisitor {
     typealias Result = Node
 
+    var footnotes = [FootnoteDefinition]()
+
     mutating func visitDocument(_ document: Document) -> Node {
-        .fragment(visitChildren(document))
+        .fragment([
+            .fragment(visitChildren(document)),
+            renderFootnoteDefinitions(),
+        ])
     }
 
     mutating func visitHeading(_ heading: Heading) -> Node {
@@ -79,6 +84,19 @@ private struct DocumentToNodes: MarkupVisitor {
         }
     }
 
+    mutating func visitFootnoteDefinition(_ footnoteDefinition: FootnoteDefinition) -> Node {
+        footnotes.append(footnoteDefinition)
+        return .fragment([])
+    }
+
+    func visitFootnoteReference(_ footnoteReference: FootnoteReference) -> Node {
+        e("sup") {
+            e("a", .href("#footnote-\(footnoteReference.footnoteID)")) {
+                "[\(footnoteReference.footnoteID)]"
+            }
+        }
+    }
+
     mutating func visitInlineCode(_ inlineCode: InlineCode) -> Node {
         e("code") { inlineCode.code }
     }
@@ -119,6 +137,28 @@ private struct DocumentToNodes: MarkupVisitor {
 
     private mutating func visitChildren(_ markup: any Markdown.Markup) -> [Node] {
         markup.children.compactMap { $0.accept(&self) }
+    }
+
+    private mutating func renderFootnoteDefinitions() -> Node {
+        e("section") {
+            e("hr")
+
+            e("h2") { "Footnotes" }
+
+            e("dl") {
+                footnotes.map { def in
+                    .fragment {
+                        e("dt", .id("footnote-\(def.footnoteID)")) {
+                            def.footnoteID
+                        }
+
+                        e("dd") {
+                            visitChildren(def)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

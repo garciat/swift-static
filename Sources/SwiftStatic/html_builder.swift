@@ -26,6 +26,10 @@ public struct HtmlBuilder {
 }
 
 extension Node {
+    public static func fragment(@HtmlBuilder content: () -> Node) -> Node {
+        .fragment(flattening: [content()])
+    }
+
     static func fragment(flattening nodes: [Node]) -> Node {
         .fragment(nodes.flatMap { $0.flattened() })
     }

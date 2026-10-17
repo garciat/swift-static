@@ -37,6 +37,7 @@ public enum AttrTag: Comparable, Hashable {
 public enum Attr {
     case id(String)
     case `class`(String)
+    case href(String)
     case lang(String)
 }
 
@@ -61,6 +62,7 @@ extension Attr {
         switch self {
         case .id(let val): (.id, val)
         case .class(let val): (.class, val)
+        case .href(let val): (.href, val)
         case .lang(let val): (.generic("lang"), val)
         }
     }

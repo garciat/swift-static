@@ -20,7 +20,10 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/swhitty/FlyingFox.git", .upToNextMajor(from: "0.27.1")),
-        .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
+        // A fork with footnotes, cmark extensions like autolinks, and GitHub alerts, which upstream does not have yet.
+        .package(
+            url: "https://github.com/sindresorhus/swift-markdown.git", branch: "sindre-improvements"
+        ),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.3"),
         .package(url: "https://github.com/jectivex/JXKit.git", .upToNextMajor(from: "3.0.0")),
     ],
